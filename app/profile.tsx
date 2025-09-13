@@ -169,7 +169,7 @@ export default function ProfileScreen() {
 
         <View style={styles.goalsCard}>
           <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>أهداف القراءة</Text>
+            <Text style={styles.cardTitle}>إحصائيات القراءة</Text>
           </View>
 
           <ProgressBar
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
     borderBottomWidth: 3,
-    borderColor: "#D3D3D3",
+    borderColor: "#E5E7EB",
   },
   actionsCard: {
     backgroundColor: "#FFFFFF",
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
     borderBottomWidth: 3,
-    borderColor: "#D3D3D3",
+    borderColor: "#E5E7EB",
   },
   cardHeader: {
     marginBottom: 16,

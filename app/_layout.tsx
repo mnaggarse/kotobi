@@ -30,16 +30,9 @@ export default function RootLayout() {
         tabBarInactiveTintColor: "#8A8A8A",
         tabBarStyle: {
           backgroundColor: "#FFFFFF",
-          borderTopWidth: 1,
-          borderTopColor: "#E5E7EB",
           paddingBottom: 24,
           paddingTop: 8,
           height: 80,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-          elevation: 3,
         },
         headerShown: false, // Hide all page headers
         tabBarLabelStyle: {

@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import MasonryList from "@react-native-seoul/masonry-list";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
@@ -301,24 +302,27 @@ export default function LibraryScreen() {
     books: Book[],
     emptyMessage: string
   ) => {
-    // Only render section if it has books
-    if (books.length === 0) {
-      return null;
-    }
+    if (books.length === 0) return null;
 
     return (
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{title}</Text>
-        <View style={styles.bookGrid}>
-          {books.map((book) => (
-            <BookCard
-              key={book.id}
-              book={book}
-              onPress={() => handleBookPress(book)}
-              onLongPress={() => handleBookLongPress(book)}
-            />
-          ))}
-        </View>
+        <MasonryList
+          data={books}
+          keyExtractor={(item) => item.id!.toString()}
+          numColumns={2} // 2-column Pinterest style
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.masonryContent}
+          renderItem={({ item }) => (
+            <View style={{ margin: 6 }}>
+              <BookCard
+                book={item as Book}
+                onPress={() => handleBookPress(item as Book)}
+                onLongPress={() => handleBookLongPress(item as Book)}
+              />
+            </View>
+          )}
+        />
       </View>
     );
   };
@@ -333,6 +337,40 @@ export default function LibraryScreen() {
     </View>
   );
 
+  const renderAllSections = () => {
+    const sections = [
+      {
+        title: "قيد القراءة",
+        books: getBooksByStatus("reading"),
+        emptyMessage: "لا توجد كتب قيد القراءة",
+      },
+      {
+        title: "للقراءة",
+        books: getBooksByStatus("to-read"),
+        emptyMessage: "لا توجد كتب للقراءة",
+      },
+      {
+        title: "مكتمل",
+        books: getBooksByStatus("completed"),
+        emptyMessage: "لا توجد كتب مكتملة",
+      },
+    ];
+
+    // Filter out empty sections
+    const nonEmptySections = sections.filter(
+      (section) => section.books.length > 0
+    );
+
+    return nonEmptySections.map((section, index) => (
+      <View key={section.title}>
+        {renderBookSection(section.title, section.books, section.emptyMessage)}
+        {index < nonEmptySections.length - 1 && (
+          <View style={styles.sectionSeparator} />
+        )}
+      </View>
+    ));
+  };
+
   return (
     <>
       <ScrollView
@@ -345,27 +383,7 @@ export default function LibraryScreen() {
         <View style={styles.header}>
           <Text style={styles.title}>المكتبة</Text>
         </View>
-        {books.length === 0 ? (
-          renderEmptyLibrary()
-        ) : (
-          <>
-            {renderBookSection(
-              "قيد القراءة",
-              getBooksByStatus("reading"),
-              "لا توجد كتب قيد القراءة"
-            )}
-            {renderBookSection(
-              "للقراءة",
-              getBooksByStatus("to-read"),
-              "لا توجد كتب للقراءة"
-            )}
-            {renderBookSection(
-              "مكتملة",
-              getBooksByStatus("completed"),
-              "لا توجد كتب مكتملة"
-            )}
-          </>
-        )}
+        {books.length === 0 ? renderEmptyLibrary() : renderAllSections()}
       </ScrollView>
 
       {/* Progress Update Modal */}
@@ -508,7 +526,11 @@ export default function LibraryScreen() {
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>إجمالي الصفحات:</Text>
               <TextInput
-                style={styles.modalTextInput}
+                style={{
+                  ...styles.modalTextInput,
+                  direction: "ltr",
+                  textAlign: "right",
+                }}
                 value={editForm.totalPages}
                 onChangeText={(text) =>
                   setEditForm((prev) => ({ ...prev, totalPages: text }))
@@ -605,7 +627,6 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingTop: 60,
-    paddingBottom: 20,
   },
   header: {
     alignItems: "center",
@@ -626,12 +647,15 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginBottom: 8,
   },
-  bookGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    paddingHorizontal: 20,
-    justifyContent: "space-between",
-    gap: 12,
+  masonryContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+  },
+  sectionSeparator: {
+    height: 2,
+    backgroundColor: "#E5E7EB",
+    marginHorizontal: 20,
+    marginBottom: 20,
   },
   emptyContainer: {
     alignItems: "center",
@@ -701,7 +725,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontFamily: "IBMPlexSansArabic-SemiBold",
-    fontSize: 20,
+    fontSize: 24,
     color: "#1A1A1A",
     textAlign: "center",
   },
@@ -714,7 +738,7 @@ const styles = StyleSheet.create({
   },
   totalPagesInfo: {
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 8,
   },
   totalPagesLabel: {
     fontFamily: "IBMPlexSansArabic-Regular",
@@ -724,7 +748,7 @@ const styles = StyleSheet.create({
   },
   totalPagesText: {
     fontFamily: "IBMPlexSansArabic-SemiBold",
-    fontSize: 20,
+    fontSize: 18,
     color: "#1A1A1A",
   },
   inputContainer: {
@@ -741,6 +765,7 @@ const styles = StyleSheet.create({
     padding: 16,
     fontSize: 20,
     color: "#1A1A1A",
+    direction: "ltr",
     textAlign: "center",
     fontFamily: "IBMPlexSansArabic-SemiBold",
   },

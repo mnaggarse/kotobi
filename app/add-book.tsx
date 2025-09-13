@@ -160,7 +160,11 @@ export default function AddBookScreen() {
             <View style={styles.inputGroup}>
               <Text style={styles.label}>إجمالي الصفحات</Text>
               <TextInput
-                style={styles.input}
+                style={{
+                  ...styles.input,
+                  direction: "ltr",
+                  textAlign: "right",
+                }}
                 value={totalPages}
                 onChangeText={setTotalPages}
                 placeholder="أدخل إجمالي عدد الصفحات"
