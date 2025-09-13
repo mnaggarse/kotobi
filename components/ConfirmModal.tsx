@@ -1,7 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { colors, designTokens, textStyles } from "../lib/styles";
+// Removed styles import - using fixed values instead
 
 interface ConfirmModalProps {
   visible: boolean;
@@ -30,23 +29,23 @@ export default function ConfirmModal({
 }: ConfirmModalProps) {
   const typeStyles = {
     danger: {
-      iconColor: colors.danger,
-      confirmButtonColor: colors.danger,
+      iconColor: "#F44336",
+      confirmButtonColor: "#F44336",
       iconBackground: "#FFEBEE",
     },
     warning: {
-      iconColor: colors.warning,
-      confirmButtonColor: colors.warning,
+      iconColor: "#FF9800",
+      confirmButtonColor: "#FF9800",
       iconBackground: "#FFF3E0",
     },
     success: {
-      iconColor: colors.success,
-      confirmButtonColor: colors.success,
+      iconColor: "#4CAF50",
+      confirmButtonColor: "#4CAF50",
       iconBackground: "#E8F5E8",
     },
     info: {
-      iconColor: colors.primary,
-      confirmButtonColor: colors.primary,
+      iconColor: "#6147E5",
+      confirmButtonColor: "#6147E5",
       iconBackground: "#EFF6FF",
     },
   }[type];
@@ -117,65 +116,73 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalContainer: {
-    backgroundColor: colors.background.primary,
-    borderRadius: designTokens.borderRadius.xl,
-    margin: designTokens.spacing.xl,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    margin: 24,
     maxWidth: 400,
     width: "90%",
-    ...designTokens.shadows.xl,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 12,
   },
   content: {
-    padding: designTokens.sizes.modal.padding,
+    padding: 28,
     alignItems: "center",
   },
   iconContainer: {
     width: 72,
     height: 72,
-    borderRadius: designTokens.borderRadius.full,
+    borderRadius: 9999,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: designTokens.spacing.lg,
+    marginBottom: 20,
   },
   title: {
-    ...textStyles.semibold2xl,
-    color: colors.text.primary,
-    marginBottom: designTokens.spacing.md,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 24,
+    color: "#1A1A1A",
+    marginBottom: 16,
     textAlign: "center",
   },
   message: {
-    ...textStyles.regularLg,
-    color: colors.text.secondary,
+    fontFamily: "IBMPlexSansArabic-Regular",
+    fontSize: 18,
+    color: "#4A4A4A",
     textAlign: "center",
     lineHeight: 24,
-    marginBottom: designTokens.spacing["2xl"],
+    marginBottom: 28,
   },
   buttonContainer: {
     flexDirection: "row",
-    gap: designTokens.spacing.md,
+    gap: 16,
     width: "100%",
   },
   cancelButton: {
     flex: 1,
-    padding: designTokens.sizes.button.paddingVertical,
-    borderRadius: designTokens.borderRadius.md,
+    padding: 16,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.background.primary,
+    borderColor: "#E5E7EB",
+    backgroundColor: "#FFFFFF",
     alignItems: "center",
   },
   cancelButtonText: {
-    ...textStyles.semiboldBase,
-    color: colors.text.secondary,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 16,
+    color: "#4A4A4A",
   },
   confirmButton: {
     flex: 1,
-    padding: designTokens.sizes.button.paddingVertical,
-    borderRadius: designTokens.borderRadius.md,
+    padding: 16,
+    borderRadius: 12,
     alignItems: "center",
   },
   confirmButtonText: {
-    ...textStyles.semiboldBase,
-    color: colors.background.primary,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 16,
+    color: "#FFFFFF",
   },
   fullWidthButton: {
     flex: 1,

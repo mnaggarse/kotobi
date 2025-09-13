@@ -15,7 +15,7 @@ import {
 import ConfirmModal from "../components/ConfirmModal";
 import ProgressBar from "../components/ProgressBar";
 import { database } from "../lib/database";
-import { colors, designTokens, textStyles } from "../lib/styles";
+// Removed styles import - using fixed values instead
 
 interface Statistics {
   totalBooks: number;
@@ -50,7 +50,7 @@ export default function ProfileScreen() {
       setStats(statistics);
     } catch (error) {
       console.error("Error loading statistics:", error);
-      Alert.alert("Error", "Failed to load statistics");
+      Alert.alert("خطأ", "فشل في تحميل الإحصائيات");
     }
   };
 
@@ -86,7 +86,7 @@ export default function ProfileScreen() {
       if (isAvailable) {
         await Sharing.shareAsync(fileUri, {
           mimeType: "application/json",
-          dialogTitle: "Export Reading Data",
+          dialogTitle: "تصدير بيانات القراءة",
         });
       } else {
         Alert.alert(
@@ -297,80 +297,89 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
+    backgroundColor: "#F8F9FA",
   },
   contentContainer: {
-    paddingTop: designTokens.spacing["6xl"],
-    paddingBottom: designTokens.spacing.lg,
+    paddingTop: 60,
+    paddingBottom: 20,
   },
   header: {
     alignItems: "center",
-    paddingBottom: designTokens.spacing.xl,
+    paddingBottom: 24,
   },
   userName: {
-    ...textStyles.semibold3xl,
-    color: colors.text.primary,
-    marginBottom: designTokens.spacing.sm,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 28,
+    color: "#1A1A1A",
+    marginBottom: 8,
   },
   goalsCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: designTokens.borderRadius.lg,
-    padding: designTokens.sizes.card.padding,
-    marginHorizontal: designTokens.spacing.base,
-    marginBottom: designTokens.sizes.card.marginBottom,
-    ...designTokens.shadows.md,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 20,
+    marginHorizontal: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderBottomWidth: 3,
+    borderColor: "#D3D3D3",
   },
   actionsCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: designTokens.borderRadius.lg,
-    padding: designTokens.sizes.card.padding,
-    marginHorizontal: designTokens.spacing.base,
-    marginBottom: designTokens.sizes.card.marginBottom,
-    ...designTokens.shadows.md,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 20,
+    marginHorizontal: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderBottomWidth: 3,
+    borderColor: "#D3D3D3",
   },
   cardHeader: {
-    marginBottom: designTokens.spacing.lg,
+    marginBottom: 16,
   },
   cardTitle: {
-    ...textStyles.semiboldXl,
-    color: colors.text.primary,
-    marginBottom: designTokens.spacing.sm,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 20,
+    color: "#1A1A1A",
+    marginBottom: 8,
     textAlign: "center",
   },
   buttonContainer: {
     flexDirection: "row",
-    gap: designTokens.spacing.md,
+    gap: 16,
   },
   actionButton: {
     flex: 1,
-    padding: designTokens.sizes.button.paddingVertical,
-    borderRadius: designTokens.borderRadius.md,
+    padding: 16,
+    borderRadius: 12,
     alignItems: "center",
   },
   exportButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: "#6147E5",
   },
   importButton: {
-    backgroundColor: colors.background.primary,
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: colors.primary,
+    borderColor: "#6147E5",
   },
   actionButtonText: {
-    ...textStyles.semiboldBase,
-    color: colors.background.primary,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 16,
+    color: "#FFFFFF",
   },
   importButtonText: {
-    ...textStyles.semiboldBase,
-    color: colors.primary,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 16,
+    color: "#6147E5",
   },
   resetButton: {
-    padding: designTokens.sizes.button.paddingVertical,
-    borderRadius: designTokens.borderRadius.md,
-    backgroundColor: colors.danger,
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: "#F44336",
     alignItems: "center",
   },
   resetButtonText: {
-    ...textStyles.semiboldBase,
-    color: colors.background.primary,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 16,
+    color: "#FFFFFF",
   },
 });

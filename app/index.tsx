@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -17,7 +17,7 @@ import {
 import BookCard from "../components/BookCard";
 import ConfirmModal from "../components/ConfirmModal";
 import { Book, database } from "../lib/database";
-import { colors, designTokens, textStyles } from "../lib/styles";
+// Removed styles import - using fixed values instead
 
 export default function LibraryScreen() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -53,7 +53,7 @@ export default function LibraryScreen() {
       setBooks(allBooks);
     } catch (error) {
       console.error("Error loading books:", error);
-      Alert.alert("Error", "Failed to load books");
+      Alert.alert("خطأ", "فشل في تحميل الكتب");
     }
   };
 
@@ -124,7 +124,7 @@ export default function LibraryScreen() {
       });
     } catch (error) {
       console.error("Error updating progress:", error);
-      Alert.alert("Error", "Failed to update progress");
+      Alert.alert("خطأ", "فشل في تحديث التقدم");
     }
   };
 
@@ -228,7 +228,7 @@ export default function LibraryScreen() {
       });
     } catch (error) {
       console.error("Error updating book:", error);
-      Alert.alert("Error", "Failed to update book");
+      Alert.alert("خطأ", "فشل في تحديث الكتاب");
     }
   };
 
@@ -252,10 +252,7 @@ export default function LibraryScreen() {
       const { status } =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert(
-          "Permission needed",
-          "Please grant permission to access your photo library"
-        );
+        Alert.alert("إذن مطلوب", "يرجى منح الإذن للوصول إلى مكتبة الصور");
         return;
       }
 
@@ -271,7 +268,7 @@ export default function LibraryScreen() {
       }
     } catch (error) {
       console.error("Error picking image:", error);
-      Alert.alert("Error", "Failed to pick image. Please try again.");
+      Alert.alert("خطأ", "فشل في اختيار الصورة. يرجى المحاولة مرة أخرى.");
     }
   };
 
@@ -291,7 +288,7 @@ export default function LibraryScreen() {
       });
     } catch (error) {
       console.error("Error deleting book:", error);
-      Alert.alert("Error", "Failed to delete book");
+      Alert.alert("خطأ", "فشل في حذف الكتاب");
     }
   };
 
@@ -303,10 +300,15 @@ export default function LibraryScreen() {
     title: string,
     books: Book[],
     emptyMessage: string
-  ) => (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      {books.length > 0 ? (
+  ) => {
+    // Only render section if it has books
+    if (books.length === 0) {
+      return null;
+    }
+
+    return (
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{title}</Text>
         <View style={styles.bookGrid}>
           {books.map((book) => (
             <BookCard
@@ -317,12 +319,17 @@ export default function LibraryScreen() {
             />
           ))}
         </View>
-      ) : (
-        <View style={styles.emptyContainer}>
-          <Ionicons name="book-outline" size={48} color="#CCCCCC" />
-          <Text style={styles.emptyText}>{emptyMessage}</Text>
-        </View>
-      )}
+      </View>
+    );
+  };
+
+  const renderEmptyLibrary = () => (
+    <View style={styles.emptyLibraryContainer}>
+      <Ionicons name="library-outline" size={80} color="#CCCCCC" />
+      <Text style={styles.emptyLibraryTitle}>مكتبتك فارغة</Text>
+      <Text style={styles.emptyLibraryMessage}>
+        ابدأ رحلتك في القراءة بإضافة كتاب جديد
+      </Text>
     </View>
   );
 
@@ -338,20 +345,26 @@ export default function LibraryScreen() {
         <View style={styles.header}>
           <Text style={styles.title}>المكتبة</Text>
         </View>
-        {renderBookSection(
-          "قيد القراءة",
-          getBooksByStatus("reading"),
-          "لا توجد كتب قيد القراءة"
-        )}
-        {renderBookSection(
-          "للقراءة",
-          getBooksByStatus("to-read"),
-          "لا توجد كتب للقراءة"
-        )}
-        {renderBookSection(
-          "مكتملة",
-          getBooksByStatus("completed"),
-          "لا توجد كتب مكتملة"
+        {books.length === 0 ? (
+          renderEmptyLibrary()
+        ) : (
+          <>
+            {renderBookSection(
+              "قيد القراءة",
+              getBooksByStatus("reading"),
+              "لا توجد كتب قيد القراءة"
+            )}
+            {renderBookSection(
+              "للقراءة",
+              getBooksByStatus("to-read"),
+              "لا توجد كتب للقراءة"
+            )}
+            {renderBookSection(
+              "مكتملة",
+              getBooksByStatus("completed"),
+              "لا توجد كتب مكتملة"
+            )}
+          </>
         )}
       </ScrollView>
 
@@ -588,47 +601,73 @@ export default function LibraryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
+    backgroundColor: "#F8F9FA",
   },
   contentContainer: {
-    paddingTop: designTokens.spacing["6xl"],
-    paddingBottom: designTokens.spacing.lg,
+    paddingTop: 60,
+    paddingBottom: 20,
   },
   header: {
     alignItems: "center",
   },
   title: {
-    ...textStyles.semibold3xl,
-    color: colors.text.primary,
-    marginBottom: designTokens.spacing.sm,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 28,
+    color: "#1A1A1A",
+    marginBottom: 8,
   },
   section: {
-    marginVertical: designTokens.spacing.lg,
+    marginVertical: 20,
   },
   sectionTitle: {
-    ...textStyles.semibold2xl,
-    color: colors.text.primary,
-    marginHorizontal: designTokens.spacing.lg,
-    marginBottom: designTokens.spacing.md,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 24,
+    color: "#1A1A1A",
+    marginHorizontal: 20,
+    marginBottom: 8,
   },
   bookGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    paddingHorizontal: designTokens.spacing.lg,
+    paddingHorizontal: 20,
     justifyContent: "space-between",
-    gap: designTokens.spacing.base,
+    gap: 12,
   },
   emptyContainer: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: designTokens.spacing["4xl"],
-    marginHorizontal: designTokens.spacing.lg,
+    paddingVertical: 40,
+    marginHorizontal: 20,
   },
   emptyText: {
-    ...textStyles.regularLg,
-    color: colors.text.light,
-    marginTop: designTokens.spacing.base,
+    fontFamily: "IBMPlexSansArabic-Regular",
+    fontSize: 18,
+    color: "#8A8A8A",
+    marginTop: 12,
     textAlign: "center",
+  },
+  emptyLibraryContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 60,
+    paddingHorizontal: 24,
+    marginTop: 120,
+  },
+  emptyLibraryTitle: {
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 24,
+    color: "#1A1A1A",
+    marginTop: 20,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  emptyLibraryMessage: {
+    fontFamily: "IBMPlexSansArabic-Regular",
+    fontSize: 18,
+    color: "#4A4A4A",
+    textAlign: "center",
+    lineHeight: 24,
   },
   modalOverlay: {
     position: "absolute",
@@ -641,59 +680,67 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalContent: {
-    backgroundColor: colors.background.primary,
-    borderRadius: designTokens.borderRadius.xl,
-    padding: designTokens.sizes.modal.padding,
-    margin: designTokens.spacing.xl,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 28,
+    margin: 24,
     width: "90%",
     maxWidth: 400,
-    ...designTokens.shadows.xl,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 12,
   },
   modalHeader: {
     alignItems: "center",
-    marginBottom: designTokens.spacing.lg,
+    marginBottom: 20,
   },
   modalIconContainer: {
-    marginBottom: designTokens.spacing.sm,
+    marginBottom: 8,
   },
   modalTitle: {
-    ...textStyles.semiboldXl,
-    color: colors.text.primary,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 20,
+    color: "#1A1A1A",
     textAlign: "center",
   },
   modalBookTitle: {
-    ...textStyles.regularLg,
-    color: colors.text.secondary,
+    fontFamily: "IBMPlexSansArabic-Regular",
+    fontSize: 18,
+    color: "#4A4A4A",
     textAlign: "center",
-    marginBottom: designTokens.spacing.base,
+    marginBottom: 12,
   },
-
   totalPagesInfo: {
     alignItems: "center",
-    marginBottom: designTokens.spacing.md,
+    marginBottom: 16,
   },
   totalPagesLabel: {
-    ...textStyles.regularSm,
-    color: colors.text.secondary,
+    fontFamily: "IBMPlexSansArabic-Regular",
+    fontSize: 14,
+    color: "#4A4A4A",
     marginBottom: 4,
   },
   totalPagesText: {
-    ...textStyles.semiboldXl,
-    color: colors.text.primary,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 20,
+    color: "#1A1A1A",
   },
   inputContainer: {
-    marginBottom: designTokens.spacing["2xl"],
+    marginBottom: 28,
   },
   inputLabel: {
-    ...textStyles.semiboldLg,
-    color: colors.text.primary,
-    marginBottom: designTokens.spacing.sm,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 18,
+    color: "#1A1A1A",
+    marginBottom: 8,
   },
   modalInput: {
     flex: 1,
-    padding: designTokens.sizes.input.paddingHorizontal,
+    padding: 16,
     fontSize: 20,
-    color: colors.text.primary,
+    color: "#1A1A1A",
     textAlign: "center",
     fontFamily: "IBMPlexSansArabic-SemiBold",
   },
@@ -701,72 +748,75 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: colors.background.secondary,
-    borderRadius: designTokens.borderRadius.md,
+    backgroundColor: "#F8F9FA",
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: "#E5E7EB",
   },
   minusButton: {
-    paddingHorizontal: designTokens.sizes.button.paddingHorizontal,
-    paddingVertical: designTokens.sizes.button.paddingVertical,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
   },
   plusButton: {
-    paddingHorizontal: designTokens.sizes.button.paddingHorizontal,
-    paddingVertical: designTokens.sizes.button.paddingVertical,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
   },
   modalButtons: {
     flexDirection: "row",
-    gap: designTokens.spacing.md,
+    gap: 16,
   },
   cancelButton: {
     flex: 1,
-    padding: designTokens.sizes.button.paddingVertical,
-    borderRadius: designTokens.borderRadius.md,
+    padding: 16,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.background.primary,
+    borderColor: "#E5E7EB",
+    backgroundColor: "#FFFFFF",
     alignItems: "center",
   },
   cancelButtonText: {
-    ...textStyles.semiboldBase,
-    color: colors.text.secondary,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 16,
+    color: "#4A4A4A",
   },
   updateButton: {
     flex: 1,
-    padding: designTokens.sizes.button.paddingVertical,
-    borderRadius: designTokens.borderRadius.md,
-    backgroundColor: colors.primary,
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: "#6147E5",
     alignItems: "center",
   },
   updateButtonText: {
-    ...textStyles.semiboldBase,
-    color: colors.background.primary,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 16,
+    color: "#FFFFFF",
   },
   modalTextInput: {
-    padding: designTokens.sizes.input.paddingHorizontal,
-    color: colors.text.primary,
-    borderRadius: designTokens.borderRadius.md,
+    padding: 16,
+    color: "#1A1A1A",
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.background.primary,
+    borderColor: "#E5E7EB",
+    backgroundColor: "#FFFFFF",
     textAlignVertical: "center",
     fontFamily: "IBMPlexSansArabic-SemiBold",
   },
   deleteButton: {
     flex: 1,
-    padding: designTokens.sizes.button.paddingVertical,
-    borderRadius: designTokens.borderRadius.md,
+    padding: 16,
+    borderRadius: 12,
     backgroundColor: "#FF6B6B",
     alignItems: "center",
   },
   deleteButtonText: {
-    ...textStyles.semiboldBase,
-    color: colors.background.primary,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 16,
+    color: "#FFFFFF",
   },
   floatingDeleteButton: {
     position: "absolute",
-    top: designTokens.spacing.sm,
-    left: designTokens.spacing.sm,
+    top: 8,
+    right: 8, // Changed from left to right for RTL
     width: 48,
     height: 48,
     justifyContent: "center",
@@ -774,22 +824,23 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   imagePickerButton: {
-    backgroundColor: colors.background.primary,
-    borderRadius: designTokens.borderRadius.md,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: "#E5E7EB",
     overflow: "hidden",
   },
   imagePlaceholder: {
     height: 140,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: colors.background.secondary,
+    backgroundColor: "#F8F9FA",
   },
   imagePlaceholderText: {
-    ...textStyles.regularSm,
-    color: colors.text.secondary,
-    marginTop: designTokens.spacing.sm,
+    fontFamily: "IBMPlexSansArabic-Regular",
+    fontSize: 14,
+    color: "#4A4A4A",
+    marginTop: 8,
   },
   selectedImage: {
     width: "100%",

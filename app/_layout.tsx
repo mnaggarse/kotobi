@@ -2,14 +2,17 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import * as NavigationBar from "expo-navigation-bar";
 import { Tabs } from "expo-router";
-import { fonts } from "../lib/fonts";
-import { designTokens } from "../lib/styles";
+import { I18nManager } from "react-native";
 
 export default function RootLayout() {
+  // Force RTL layout
+  I18nManager.forceRTL(true);
+  I18nManager.allowRTL(true);
+
   // Load custom fonts
   const [fontsLoaded] = useFonts({
-    [fonts.regular]: require("../assets/fonts/IBMPlexSansArabic-Regular.ttf"),
-    [fonts.semibold]: require("../assets/fonts/IBMPlexSansArabic-SemiBold.ttf"),
+    "IBMPlexSansArabic-Regular": require("../assets/fonts/IBMPlexSansArabic-Regular.ttf"),
+    "IBMPlexSansArabic-SemiBold": require("../assets/fonts/IBMPlexSansArabic-SemiBold.ttf"),
   });
 
   // Hide the navigation bar
@@ -23,20 +26,24 @@ export default function RootLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: designTokens.colors.primary,
-        tabBarInactiveTintColor: designTokens.colors.text.light,
+        tabBarActiveTintColor: "#6147E5",
+        tabBarInactiveTintColor: "#8A8A8A",
         tabBarStyle: {
-          backgroundColor: designTokens.colors.background.primary,
+          backgroundColor: "#FFFFFF",
           borderTopWidth: 1,
-          borderTopColor: designTokens.colors.border,
-          paddingBottom: designTokens.spacing.xl,
-          paddingTop: designTokens.spacing.sm,
+          borderTopColor: "#E5E7EB",
+          paddingBottom: 24,
+          paddingTop: 8,
           height: 80,
-          ...designTokens.shadows.sm,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 3,
         },
         headerShown: false, // Hide all page headers
         tabBarLabelStyle: {
-          fontFamily: fonts.semibold,
+          fontFamily: "IBMPlexSansArabic-SemiBold",
           fontSize: 13,
           marginTop: 4,
         },

@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Alert,
   Image,
@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import ConfirmModal from "../components/ConfirmModal";
 import { database } from "../lib/database";
-import { colors, designTokens, textStyles } from "../lib/styles";
+// Removed styles import - using fixed values instead
 
 export default function AddBookScreen() {
   const [title, setTitle] = useState("");
@@ -34,10 +34,7 @@ export default function AddBookScreen() {
       const { status } =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert(
-          "Permission needed",
-          "Please grant permission to access your photo library"
-        );
+        Alert.alert("إذن مطلوب", "يرجى منح الإذن للوصول إلى مكتبة الصور");
         return;
       }
 
@@ -53,7 +50,7 @@ export default function AddBookScreen() {
       }
     } catch (error) {
       console.error("Error picking image:", error);
-      Alert.alert("Error", "Failed to pick image. Please try again.");
+      Alert.alert("خطأ", "فشل في اختيار الصورة. يرجى المحاولة مرة أخرى.");
     }
   };
 
@@ -181,7 +178,7 @@ export default function AddBookScreen() {
               disabled={isSubmitting}
             >
               <Text style={styles.submitButtonText}>
-                {isSubmitting ? "جاري الإضافة..." : "إضافة كتاب"}
+                {isSubmitting ? "جاري الإضافة..." : "إضافة الكتاب"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -206,76 +203,79 @@ export default function AddBookScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
+    backgroundColor: "#F8F9FA",
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingTop: designTokens.spacing["6xl"],
-    padding: designTokens.spacing.lg,
+    paddingTop: 60,
+    padding: 20,
   },
   header: {
     alignItems: "center",
-    paddingBottom: designTokens.spacing.xl,
+    paddingBottom: 24,
   },
   headerTitle: {
-    ...textStyles.semibold3xl,
-    color: colors.text.primary,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 28,
+    color: "#1A1A1A",
   },
   form: {
     flex: 1,
   },
   inputGroup: {
-    marginBottom: designTokens.spacing.xl,
+    marginBottom: 24,
   },
   label: {
-    ...textStyles.semiboldLg,
-    color: colors.text.primary,
-    marginBottom: designTokens.spacing.base,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 18,
+    color: "#1A1A1A",
+    marginBottom: 8,
   },
   input: {
-    backgroundColor: colors.background.primary,
-    borderRadius: designTokens.borderRadius.md,
-    padding: designTokens.sizes.input.paddingHorizontal,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    padding: 16,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: "#E5E7EB",
     fontFamily: "IBMPlexSansArabic-SemiBold",
   },
   imagePickerButton: {
-    backgroundColor: colors.background.primary,
-    borderRadius: designTokens.borderRadius.md,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: "#E5E7EB",
     overflow: "hidden",
   },
   selectedImage: {
     width: "100%",
-    height: designTokens.sizes.image.placeholder.height,
+    height: 160,
     resizeMode: "cover",
   },
   imagePlaceholder: {
-    height: designTokens.sizes.image.placeholder.height,
+    height: 160,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: colors.background.primary,
+    backgroundColor: "#FFFFFF",
   },
   imagePlaceholderText: {
-    ...textStyles.regularLg,
-    color: colors.text.secondary,
-    marginTop: designTokens.spacing.base,
+    fontFamily: "IBMPlexSansArabic-Regular",
+    fontSize: 18,
+    color: "#4A4A4A",
+    marginTop: 12,
   },
   submitButton: {
-    backgroundColor: colors.primary,
-    borderRadius: designTokens.borderRadius.md,
-    padding: designTokens.spacing.lg,
+    backgroundColor: "#6147E5",
+    borderRadius: 12,
+    padding: 20,
     alignItems: "center",
-    marginTop: designTokens.spacing.xl,
-    ...designTokens.shadows.lg,
+    marginTop: 8,
   },
   submitButtonDisabled: {
-    backgroundColor: colors.text.light,
+    backgroundColor: "#8A8A8A",
   },
   submitButtonText: {
-    color: colors.background.primary,
-    ...textStyles.semiboldLg,
+    color: "#FFFFFF",
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 18,
   },
 });

@@ -22,7 +22,7 @@ class DatabaseService {
   private db: SQLite.SQLiteDatabase;
 
   constructor() {
-    this.db = SQLite.openDatabaseSync("reading-tracker.db");
+    this.db = SQLite.openDatabaseSync("kotobi.db");
     this.initDatabase();
   }
 

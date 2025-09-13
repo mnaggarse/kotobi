@@ -1,6 +1,5 @@
-import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { colors, designTokens, textStyles } from "../lib/styles";
+// Removed styles import - using fixed values instead
 
 interface ProgressBarProps {
   label: string;
@@ -13,7 +12,7 @@ export default function ProgressBar({
   label,
   current,
   total,
-  color = colors.primary,
+  color = "#6147E5",
 }: ProgressBarProps) {
   const percentage = total > 0 ? (current / total) * 100 : 0;
 
@@ -44,33 +43,35 @@ export default function ProgressBar({
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: designTokens.spacing.sm,
+    marginVertical: 8,
   },
   labelContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: designTokens.spacing.sm,
+    marginBottom: 8,
   },
   label: {
-    ...textStyles.semiboldSm,
-    color: colors.text.primary,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 14,
+    color: "#1A1A1A",
   },
   value: {
-    ...textStyles.semiboldXs,
-    color: colors.text.secondary,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 12,
+    color: "#4A4A4A",
   },
   progressContainer: {
-    height: designTokens.sizes.progress.height,
+    height: 12,
   },
   progressBar: {
     height: "100%",
-    backgroundColor: designTokens.colors.progress.background,
-    borderRadius: designTokens.sizes.progress.borderRadius,
+    backgroundColor: "#F3F4F6",
+    borderRadius: 6,
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
-    borderRadius: designTokens.sizes.progress.borderRadius,
+    borderRadius: 6,
   },
 });

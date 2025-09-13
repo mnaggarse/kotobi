@@ -1,7 +1,6 @@
-import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Book } from "../lib/database";
-import { colors, designTokens, textStyles } from "../lib/styles";
+// Removed styles import - using fixed values instead
 
 interface BookCardProps {
   book: Book;
@@ -19,10 +18,10 @@ export default function BookCard({
 
   const progressColor =
     book.status === "completed"
-      ? colors.success
+      ? "#4CAF50"
       : book.status === "reading"
-      ? colors.primary
-      : designTokens.colors.progress.background;
+      ? "#6147E5"
+      : "#F3F4F6";
 
   return (
     <TouchableOpacity
@@ -37,17 +36,10 @@ export default function BookCard({
           style={styles.cover}
           resizeMode="cover"
         />
-        {book.status === "completed" && (
-          <View style={styles.completedBadge}>
-            <Text style={styles.completedText}>✓</Text>
-          </View>
-        )}
       </View>
 
       <View style={styles.infoContainer}>
-        <Text style={styles.title} numberOfLines={1}>
-          {book.title}
-        </Text>
+        <Text style={styles.title}>{book.title}</Text>
 
         <View style={styles.progressContainer}>
           <View style={styles.progressBar}>
@@ -72,68 +64,56 @@ export default function BookCard({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.background.primary,
-    borderRadius: designTokens.borderRadius.lg,
-    padding: designTokens.spacing.sm,
-    marginVertical: designTokens.spacing.sm,
-    ...designTokens.shadows.md,
-    width: "47%", // Two books per row with proper spacing
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 8,
+    marginVertical: 8,
+    width: "47%",
+    borderWidth: 1,
+    borderBottomWidth: 3,
+    borderColor: "#D3D3D3",
   },
   coverContainer: {
     position: "relative",
-    marginBottom: designTokens.spacing.sm,
+    marginBottom: 8,
   },
   cover: {
     width: "100%",
-    height: designTokens.sizes.image.cover.height,
-    borderRadius: designTokens.sizes.image.cover.borderRadius,
-  },
-  completedBadge: {
-    position: "absolute",
-    top: designTokens.spacing.sm,
-    left: designTokens.spacing.sm,
-    backgroundColor: colors.success,
-    borderRadius: designTokens.borderRadius.full,
-    width: 32,
-    height: 32,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  completedText: {
-    color: colors.background.primary,
-    fontSize: 16,
-    fontWeight: "bold",
+    height: 220,
+    borderRadius: 12,
   },
   infoContainer: {
     flex: 1,
   },
   title: {
-    ...textStyles.semiboldBase,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 16,
     textAlign: "center",
-    color: colors.text.primary,
-    marginBottom: designTokens.spacing.sm,
+    color: "#1A1A1A",
+    marginBottom: 8,
     lineHeight: 22,
   },
   progressContainer: {
     marginTop: "auto",
     flexDirection: "row",
     alignItems: "center",
-    gap: designTokens.spacing.sm,
+    gap: 8,
   },
   progressBar: {
     flex: 1,
-    height: designTokens.sizes.progress.height,
-    backgroundColor: designTokens.colors.progress.background,
-    borderRadius: designTokens.sizes.progress.borderRadius,
+    height: 12,
+    backgroundColor: "#F3F4F6",
+    borderRadius: 6,
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
-    borderRadius: designTokens.sizes.progress.borderRadius,
+    borderRadius: 6,
   },
   percentageText: {
-    ...textStyles.semiboldSm,
-    color: colors.text.secondary,
+    fontFamily: "IBMPlexSansArabic-SemiBold",
+    fontSize: 14,
+    color: "#4A4A4A",
     textAlign: "right",
   },
 });

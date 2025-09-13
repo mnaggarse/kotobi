@@ -1,19 +1,20 @@
 {
   "expo": {
-    "name": "Reading Tracker",
-    "slug": "reading-tracker",
+    "name": "كتبي",
+    "slug": "kotobi",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "reading-tracker",
+    "scheme": "kotobi",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "forceRTL": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.mnaggarse.reading_tracker"
+      "bundleIdentifier": "com.mnaggarse.kotobi"
     },
     "android": {
-      "package": "com.mnaggarse.reading_tracker",
+      "package": "com.mnaggarse.kotobi",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -21,7 +22,8 @@
       "edgeToEdgeEnabled": true,
       "permissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE"
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -53,8 +55,9 @@
     },
     "extra": {
       "eas": {
-        "projectId": "4c6d5c7b-c343-4b49-8b57-0000eda124d5"
-      }
+        "projectId": "2391cce9-c076-4cde-948f-156fa70ecf29"
+      },
+      "router": {}
     }
   }
 }
