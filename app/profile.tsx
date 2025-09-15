@@ -284,7 +284,7 @@ export default function ProfileScreen() {
           });
         }}
         title="اكتمل الاستيراد"
-        message="تم استيراد بيانات القراءة بنجاح! تم تحديث مكتبتك بالكتب والتقدم المستورد."
+        message="تم استيراد بيانات الكتب بنجاح"
         confirmText="حسناً"
         type="success"
         icon="cloud-download-outline"

@@ -16,6 +16,8 @@ interface DatabaseValidationResult {
   isValid: boolean;
   error?: string;
   books?: Book[];
+  // Preserve the original parsed objects to access extended fields like coverData during import
+  rawBooks?: any[];
 }
 
 class DatabaseService {
@@ -141,10 +143,41 @@ class DatabaseService {
       const books = this.getBooks();
       const statistics = this.getStatistics();
 
+      // Embed cover images as Base64 so exports are self-contained
+      const booksWithEmbeddedCovers = await Promise.all(
+        books.map(async (book) => {
+          let coverData: { base64: string; ext: string } | null = null;
+          try {
+            // Only attempt to embed if the cover is a local file path
+            const isFileUri =
+              typeof book.cover === "string" &&
+              (book.cover.startsWith("file://") ||
+                book.cover.startsWith(FileSystem.documentDirectory || ""));
+            if (isFileUri) {
+              const info = await FileSystem.getInfoAsync(book.cover);
+              if (info.exists && info.isDirectory === false) {
+                const base64 = await FileSystem.readAsStringAsync(book.cover, {
+                  encoding: FileSystem.EncodingType.Base64,
+                });
+                const extFromPath = book.cover.includes(".")
+                  ? book.cover.split(".").pop() || "jpg"
+                  : "jpg";
+                coverData = { base64, ext: extFromPath };
+              }
+            }
+          } catch (e) {
+            // If we fail to read/encode the cover, continue without embedding
+            console.warn("Failed to embed cover for export:", e);
+          }
+          return { ...book, coverData };
+        })
+      );
+
       const exportData = {
-        version: "1.0",
+        // Bump version to indicate embedded cover support
+        version: "1.1",
         exportedAt: new Date().toISOString(),
-        books,
+        books: booksWithEmbeddedCovers,
         statistics,
       };
 
@@ -161,7 +194,7 @@ class DatabaseService {
 
       const dateString = `${day}-${month}-${year}_${hours}-${minutes}-${seconds}`;
 
-      const fileName = `Reading-Tracker_${dateString}.json`;
+      const fileName = `kotobi_backup_${dateString}.json`;
       const fileUri = `${FileSystem.documentDirectory}${fileName}`;
 
       await FileSystem.writeAsStringAsync(fileUri, jsonString);
@@ -185,7 +218,7 @@ class DatabaseService {
         };
       }
 
-      // Validate each book
+      // Validate each book (core fields). Extra fields like coverData are allowed and ignored here
       const validBooks: Book[] = [];
       for (const book of data.books) {
         if (!this.isValidBook(book)) {
@@ -200,6 +233,7 @@ class DatabaseService {
       return {
         isValid: true,
         books: validBooks,
+        rawBooks: data.books,
       };
     } catch (error) {
       return {
@@ -222,10 +256,59 @@ class DatabaseService {
 
       // Import new data
       if (validation.books && validation.books.length > 0) {
-        for (const book of validation.books) {
+        const rawBooks = validation.rawBooks || validation.books;
+        // Ensure covers directory exists under the app's document directory
+        const coversDir = `${FileSystem.documentDirectory}covers/`;
+        try {
+          const dirInfo = await FileSystem.getInfoAsync(coversDir);
+          if (!dirInfo.exists) {
+            await FileSystem.makeDirectoryAsync(coversDir, {
+              intermediates: true,
+            });
+          }
+        } catch (e) {
+          console.warn("Failed to ensure covers directory:", e);
+        }
+
+        for (let i = 0; i < validation.books.length; i++) {
+          const book = validation.books[i];
+          const rawBook: any = rawBooks[i] || {};
+
+          let finalCoverPath = book.cover;
+          // If embedded coverData exists, restore it to persistent storage and use that path
+          if (
+            rawBook &&
+            rawBook.coverData &&
+            typeof rawBook.coverData.base64 === "string" &&
+            rawBook.coverData.base64.length > 0
+          ) {
+            const ext =
+              typeof rawBook.coverData.ext === "string" &&
+              rawBook.coverData.ext.length > 0
+                ? rawBook.coverData.ext.replace(/[^a-zA-Z0-9]/g, "")
+                : "jpg";
+            const fileName = `cover_${Date.now()}_${i}.${ext}`;
+            const fileUri = `${coversDir}${fileName}`;
+            try {
+              await FileSystem.writeAsStringAsync(
+                fileUri,
+                rawBook.coverData.base64,
+                {
+                  encoding: FileSystem.EncodingType.Base64,
+                }
+              );
+              finalCoverPath = fileUri;
+            } catch (e) {
+              console.warn(
+                "Failed to restore embedded cover; falling back to original cover path:",
+                e
+              );
+            }
+          }
+
           this.addBook({
             title: book.title,
-            cover: book.cover,
+            cover: finalCoverPath,
             totalPages: book.totalPages,
             pagesRead: book.pagesRead,
             status: book.status,

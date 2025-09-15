@@ -14,14 +14,21 @@ export default function ProgressBar({
   total,
   color = "#6147E5",
 }: ProgressBarProps) {
-  const percentage = total > 0 ? (current / total) * 100 : 0;
+  const safeTotal = Math.max(0, Number.isFinite(total) ? total : 0);
+  const boundedCurrent = Math.min(
+    Math.max(0, Number.isFinite(current) ? current : 0),
+    safeTotal
+  );
+  const percentage = safeTotal > 0 ? (boundedCurrent / safeTotal) * 100 : 0;
 
   return (
     <View style={styles.container}>
       <View style={styles.labelContainer}>
-        <Text style={styles.label}>{label}</Text>
-        <Text style={styles.value}>
-          {total}/{current} ({Math.floor(percentage)}%)
+        <Text style={styles.label} numberOfLines={1} allowFontScaling={false}>
+          {label}
+        </Text>
+        <Text style={styles.value} numberOfLines={1} allowFontScaling={false}>
+          {boundedCurrent}/{safeTotal} ({Math.round(percentage)}%)
         </Text>
       </View>
       <View style={styles.progressContainer}>
@@ -30,7 +37,7 @@ export default function ProgressBar({
             style={[
               styles.progressFill,
               {
-                width: `${percentage}%`,
+                width: `${Math.min(100, Math.max(0, percentage))}%`,
                 backgroundColor: color,
               },
             ]}
@@ -55,11 +62,14 @@ const styles = StyleSheet.create({
     fontFamily: "IBMPlexSansArabic-SemiBold",
     fontSize: 14,
     color: "#1A1A1A",
+    maxWidth: "60%",
   },
   value: {
     fontFamily: "IBMPlexSansArabic-SemiBold",
     fontSize: 12,
     color: "#4A4A4A",
+    maxWidth: "40%",
+    textAlign: "left",
   },
   progressContainer: {
     height: 12,

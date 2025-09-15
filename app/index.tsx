@@ -6,7 +6,9 @@ import { useEffect, useState } from "react";
 import {
   Alert,
   Image,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -18,7 +20,6 @@ import {
 import BookCard from "../components/BookCard";
 import ConfirmModal from "../components/ConfirmModal";
 import { Book, database } from "../lib/database";
-// Removed styles import - using fixed values instead
 
 export default function LibraryScreen() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -394,75 +395,91 @@ export default function LibraryScreen() {
         onRequestClose={() => setProgressModalVisible(false)}
         statusBarTranslucent={true}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>تحديث التقدم</Text>
-              <Text style={styles.modalBookTitle}>{selectedBook?.title}</Text>
-            </View>
-
-            <View style={styles.totalPagesInfo}>
-              <Text style={styles.totalPagesText}>
-                عدد الصفحات: {selectedBook?.totalPages}
-              </Text>
-            </View>
-
-            <View style={styles.inputContainer}>
-              <View style={styles.inputWithButtons}>
-                <TouchableOpacity
-                  style={styles.plusButton}
-                  onPress={() => {
-                    const current = parseInt(newPagesRead) || 0;
-                    const max = selectedBook?.totalPages || 0;
-                    const newValue = Math.min(max, current + 1);
-                    setNewPagesRead(newValue.toString());
-                  }}
-                >
-                  <Ionicons name="add" size={24} color="#666666" />
-                </TouchableOpacity>
-
-                <TextInput
-                  style={styles.modalInput}
-                  value={newPagesRead}
-                  onChangeText={setNewPagesRead}
-                  keyboardType="numeric"
-                  placeholder="0"
-                  placeholderTextColor="#999999"
-                  textAlign="center"
-                />
-                <TouchableOpacity
-                  style={styles.minusButton}
-                  onPress={() => {
-                    const current = parseInt(newPagesRead) || 0;
-                    const newValue = Math.max(0, current - 1);
-                    setNewPagesRead(newValue.toString());
-                  }}
-                >
-                  <Ionicons name="remove" size={24} color="#666666" />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.updateButton}
-                onPress={updateBookProgress}
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.select({ ios: 80, android: 0 })}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode="on-drag"
+                overScrollMode="never"
+                contentContainerStyle={{ paddingBottom: 16, flexGrow: 1 }}
+                showsVerticalScrollIndicator={false}
               >
-                <Text style={styles.updateButtonText}>تحديث</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => {
-                  setProgressModalVisible(false);
-                  setSelectedBook(null);
-                  setNewPagesRead("");
-                }}
-              >
-                <Text style={styles.cancelButtonText}>إلغاء</Text>
-              </TouchableOpacity>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>تحديث التقدم</Text>
+                  <Text style={styles.modalBookTitle}>
+                    {selectedBook?.title}
+                  </Text>
+                </View>
+
+                <View style={styles.totalPagesInfo}>
+                  <Text style={styles.totalPagesText}>
+                    عدد الصفحات: {selectedBook?.totalPages}
+                  </Text>
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <View style={styles.inputWithButtons}>
+                    <TouchableOpacity
+                      style={styles.plusButton}
+                      onPress={() => {
+                        const current = parseInt(newPagesRead) || 0;
+                        const max = selectedBook?.totalPages || 0;
+                        const newValue = Math.min(max, current + 1);
+                        setNewPagesRead(newValue.toString());
+                      }}
+                    >
+                      <Ionicons name="add" size={24} color="#666666" />
+                    </TouchableOpacity>
+
+                    <TextInput
+                      style={styles.modalInput}
+                      value={newPagesRead}
+                      onChangeText={setNewPagesRead}
+                      keyboardType="numeric"
+                      placeholder="0"
+                      placeholderTextColor="#999999"
+                      textAlign="center"
+                    />
+                    <TouchableOpacity
+                      style={styles.minusButton}
+                      onPress={() => {
+                        const current = parseInt(newPagesRead) || 0;
+                        const newValue = Math.max(0, current - 1);
+                        setNewPagesRead(newValue.toString());
+                      }}
+                    >
+                      <Ionicons name="remove" size={24} color="#666666" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity
+                    style={styles.updateButton}
+                    onPress={updateBookProgress}
+                  >
+                    <Text style={styles.updateButtonText}>تحديث</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.cancelButton}
+                    onPress={() => {
+                      setProgressModalVisible(false);
+                      setSelectedBook(null);
+                      setNewPagesRead("");
+                    }}
+                  >
+                    <Text style={styles.cancelButtonText}>إلغاء</Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Edit Book Modal */}
@@ -473,99 +490,105 @@ export default function LibraryScreen() {
         onRequestClose={() => setEditModalVisible(false)}
         statusBarTranslucent={true}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            {/* Floating Delete Button */}
-            <TouchableOpacity
-              style={styles.floatingDeleteButton}
-              onPress={handleDeleteFromEdit}
-            >
-              <Ionicons name="trash" size={24} color="#F44336" />
-            </TouchableOpacity>
-
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>تعديل الكتاب</Text>
-              <Text style={styles.modalBookTitle}>{bookToEdit?.title}</Text>
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>صورة الغلاف:</Text>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.select({ ios: 80, android: 0 })}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              {/* Floating Delete Button */}
               <TouchableOpacity
-                style={styles.imagePickerButton}
-                onPress={pickEditImage}
+                style={styles.floatingDeleteButton}
+                onPress={handleDeleteFromEdit}
               >
-                {editForm.cover ? (
-                  <Image
-                    source={{ uri: editForm.cover }}
-                    style={styles.selectedImage}
-                  />
-                ) : (
-                  <View style={styles.imagePlaceholder}>
-                    <Ionicons name="camera" size={32} color="#666666" />
-                    <Text style={styles.imagePlaceholderText}>
-                      اختر صورة الغلاف
-                    </Text>
-                  </View>
-                )}
+                <Ionicons name="trash" size={24} color="#F44336" />
               </TouchableOpacity>
-            </View>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>عنوان الكتاب:</Text>
-              <TextInput
-                style={styles.modalTextInput}
-                value={editForm.title}
-                onChangeText={(text) =>
-                  setEditForm((prev) => ({ ...prev, title: text }))
-                }
-                placeholder="أدخل عنوان الكتاب"
-                placeholderTextColor="#999999"
-              />
-            </View>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>تعديل الكتاب</Text>
+                <Text style={styles.modalBookTitle}>{bookToEdit?.title}</Text>
+              </View>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>إجمالي الصفحات:</Text>
-              <TextInput
-                style={{
-                  ...styles.modalTextInput,
-                  direction: "ltr",
-                  textAlign: "right",
-                }}
-                value={editForm.totalPages}
-                onChangeText={(text) =>
-                  setEditForm((prev) => ({ ...prev, totalPages: text }))
-                }
-                keyboardType="numeric"
-                placeholder="أدخل إجمالي الصفحات"
-                placeholderTextColor="#999999"
-              />
-            </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>صورة الغلاف:</Text>
+                <TouchableOpacity
+                  style={styles.imagePickerButton}
+                  onPress={pickEditImage}
+                >
+                  {editForm.cover ? (
+                    <Image
+                      source={{ uri: editForm.cover }}
+                      style={styles.selectedImage}
+                    />
+                  ) : (
+                    <View style={styles.imagePlaceholder}>
+                      <Ionicons name="camera" size={32} color="#666666" />
+                      <Text style={styles.imagePlaceholderText}>
+                        اختر صورة الغلاف
+                      </Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              </View>
 
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.updateButton}
-                onPress={handleEditBook}
-              >
-                <Text style={styles.updateButtonText}>حفظ</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => {
-                  setEditModalVisible(false);
-                  setBookToEdit(null);
-                  setEditForm({
-                    title: "",
-                    totalPages: "",
-                    status: "to-read",
-                    cover: "",
-                  });
-                }}
-              >
-                <Text style={styles.cancelButtonText}>إلغاء</Text>
-              </TouchableOpacity>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>عنوان الكتاب:</Text>
+                <TextInput
+                  style={styles.modalTextInput}
+                  value={editForm.title}
+                  onChangeText={(text) =>
+                    setEditForm((prev) => ({ ...prev, title: text }))
+                  }
+                  placeholder="أدخل عنوان الكتاب"
+                  placeholderTextColor="#999999"
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>إجمالي الصفحات:</Text>
+                <TextInput
+                  style={{
+                    ...styles.modalTextInput,
+                    direction: "ltr",
+                    textAlign: "right",
+                  }}
+                  value={editForm.totalPages}
+                  onChangeText={(text) =>
+                    setEditForm((prev) => ({ ...prev, totalPages: text }))
+                  }
+                  keyboardType="numeric"
+                  placeholder="أدخل إجمالي الصفحات"
+                  placeholderTextColor="#999999"
+                />
+              </View>
+
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={styles.updateButton}
+                  onPress={handleEditBook}
+                >
+                  <Text style={styles.updateButtonText}>حفظ</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => {
+                    setEditModalVisible(false);
+                    setBookToEdit(null);
+                    setEditForm({
+                      title: "",
+                      totalPages: "",
+                      status: "to-read",
+                      cover: "",
+                    });
+                  }}
+                >
+                  <Text style={styles.cancelButtonText}>إلغاء</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Delete Book Confirmation Modal */}
@@ -611,7 +634,7 @@ export default function LibraryScreen() {
         }}
         title="إعادة تعيين التقدم"
         message={`تحاول تعيين إجمالي الصفحات إلى ${pendingEditData?.totalPages}، لكنك قرأت بالفعل ${bookToEdit?.pagesRead} صفحة. سيؤدي هذا إلى إعادة تعيين تقدم القراءة إلى 0 صفحة.`}
-        confirmText="إعادة تعيين التقدم"
+        confirmText="إعادة تعيين"
         cancelText="إلغاء"
         type="danger"
         icon="warning-outline"
