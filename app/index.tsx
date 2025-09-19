@@ -383,7 +383,11 @@ export default function LibraryScreen() {
         onRequestClose={() => setProgressModalVisible(false)}
         statusBarTranslucent={true}
       >
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView
+          behavior="padding"
+          style={styles.modalOverlay}
+          keyboardVerticalOffset={-100}
+        >
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>تحديث التقدم</Text>
@@ -451,7 +455,7 @@ export default function LibraryScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Edit Book Modal */}
@@ -535,15 +539,20 @@ export default function LibraryScreen() {
                 التقييم:
               </Text>
               <View style={styles.ratingRow}>
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <TouchableOpacity key={i} onPress={() => setEditRating(i)}>
-                    <Ionicons
-                      name={i <= editRating ? "star" : "star-outline"}
-                      size={20}
-                      color={i <= editRating ? "#F59E0B" : "#C7C7C7"}
-                    />
-                  </TouchableOpacity>
-                ))}
+                <View style={styles.starsRow}>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <TouchableOpacity key={i} onPress={() => setEditRating(i)}>
+                      <Ionicons
+                        name={i <= editRating ? "star" : "star-outline"}
+                        size={20}
+                        color={i <= editRating ? "#F59E0B" : "#C7C7C7"}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                <TouchableOpacity onPress={() => setEditRating(0)}>
+                  <Ionicons name="refresh" size={20} color="#6B7280" />
+                </TouchableOpacity>
               </View>
             </View>
 
@@ -825,9 +834,14 @@ const styles = StyleSheet.create({
     fontFamily: "IBMPlexSansArabic-SemiBold",
   },
   ratingRow: {
+    width: "79%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  starsRow: {
     flexDirection: "row",
     gap: 8,
-    alignItems: "center",
   },
   inlineLabelRow: {
     flexDirection: "row",

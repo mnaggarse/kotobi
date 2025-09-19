@@ -28,7 +28,7 @@ export default function ProgressBar({
           {label}
         </Text>
         <Text style={styles.value} numberOfLines={1} allowFontScaling={false}>
-          {boundedCurrent}/{safeTotal} ({Math.round(percentage)}%)
+          {safeTotal}/{boundedCurrent} ({Math.floor(percentage)}%)
         </Text>
       </View>
       <View style={styles.progressContainer}>

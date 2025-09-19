@@ -82,6 +82,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
     padding: 12,
+    paddingVertical: 8,
     width: "100%",
     borderWidth: 1,
     borderBottomWidth: 3,
@@ -98,11 +99,12 @@ const styles = StyleSheet.create({
   infoContainer: {
     flex: 1,
     justifyContent: "space-between",
-    height: 132,
+    height: 138,
   },
   title: {
     fontFamily: "IBMPlexSansArabic-SemiBold",
     fontSize: 18,
+    paddingTop: 4,
     color: "#1A1A1A",
     lineHeight: 24,
   },
@@ -140,6 +142,7 @@ const styles = StyleSheet.create({
   percentageText: {
     fontFamily: "IBMPlexSansArabic-SemiBold",
     fontSize: 14,
+    paddingTop: 3,
     color: "#4A4A4A",
   },
 });
