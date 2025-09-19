@@ -8,6 +8,7 @@ export interface Book {
   totalPages: number;
   pagesRead: number;
   status: "reading" | "completed" | "to-read";
+  rating: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -38,6 +39,7 @@ class DatabaseService {
           totalPages INTEGER NOT NULL,
           pagesRead INTEGER DEFAULT 0,
           status TEXT DEFAULT 'to-read',
+          rating INTEGER DEFAULT 0,
           createdAt TEXT NOT NULL,
           updatedAt TEXT NOT NULL
         );`
@@ -50,13 +52,14 @@ class DatabaseService {
   addBook(book: Omit<Book, "id" | "createdAt" | "updatedAt">): number {
     const now = new Date().toISOString();
     const result = this.db.runSync(
-      "INSERT INTO books (title, cover, totalPages, pagesRead, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO books (title, cover, totalPages, pagesRead, status, rating, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
       [
         book.title,
         book.cover,
         book.totalPages,
         book.pagesRead,
         book.status,
+        book.rating,
         now,
         now,
       ]
@@ -95,12 +98,13 @@ class DatabaseService {
     title: string,
     totalPages: number,
     status: Book["status"],
-    cover: string
+    cover: string,
+    rating: number
   ): void {
     const now = new Date().toISOString();
     this.db.runSync(
-      "UPDATE books SET title = ?, totalPages = ?, status = ?, cover = ?, updatedAt = ? WHERE id = ?",
-      [title, totalPages, status, cover, now, id]
+      "UPDATE books SET title = ?, totalPages = ?, status = ?, cover = ?, rating = ?, updatedAt = ? WHERE id = ?",
+      [title, totalPages, status, cover, rating, now, id]
     );
   }
 
@@ -312,6 +316,7 @@ class DatabaseService {
             totalPages: book.totalPages,
             pagesRead: book.pagesRead,
             status: book.status,
+            rating: book.rating,
           });
         }
       }

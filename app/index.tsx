@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import MasonryList from "@react-native-seoul/masonry-list";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
@@ -8,7 +7,6 @@ import {
   Image,
   KeyboardAvoidingView,
   Modal,
-  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -40,12 +38,14 @@ export default function LibraryScreen() {
     status: "to-read" as Book["status"],
     cover: "",
   });
+  const [editRating, setEditRating] = useState(0);
   const [pagesWarningModalVisible, setPagesWarningModalVisible] =
     useState(false);
   const [pendingEditData, setPendingEditData] = useState<{
     title: string;
     totalPages: number;
     cover: string;
+    rating: number;
   } | null>(null);
   const params = useLocalSearchParams();
 
@@ -138,6 +138,7 @@ export default function LibraryScreen() {
       status: book.status,
       cover: book.cover,
     });
+    setEditRating(typeof book.rating === "number" ? book.rating : 0);
     setEditModalVisible(true);
   };
 
@@ -166,6 +167,7 @@ export default function LibraryScreen() {
         title: editForm.title,
         totalPages: Number(editForm.totalPages),
         cover: editForm.cover,
+        rating: editRating,
       });
       return;
     }
@@ -184,6 +186,7 @@ export default function LibraryScreen() {
         ? pendingEditData.title
         : editForm.title.trim();
       const newCover = pendingEditData ? pendingEditData.cover : editForm.cover;
+      const newRating = pendingEditData ? pendingEditData.rating : editRating;
 
       // Reset pages read to 0 if total pages is less than current pages read
       const newPagesRead =
@@ -204,7 +207,8 @@ export default function LibraryScreen() {
         newTitle,
         newTotalPages,
         newStatus,
-        newCover
+        newCover,
+        newRating
       );
 
       // Also update the pages read if it changed
@@ -220,6 +224,7 @@ export default function LibraryScreen() {
         status: "to-read",
         cover: "",
       });
+      setEditRating(0);
       setPagesWarningModalVisible(false);
       setPendingEditData(null);
 
@@ -303,27 +308,24 @@ export default function LibraryScreen() {
     books: Book[],
     emptyMessage: string
   ) => {
-    if (books.length === 0) return null;
+    // Only render section if it has books
+    if (books.length === 0) {
+      return null;
+    }
 
     return (
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{title}</Text>
-        <MasonryList
-          data={books}
-          keyExtractor={(item) => item.id!.toString()}
-          numColumns={2} // 2-column Pinterest style
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.masonryContent}
-          renderItem={({ item }) => (
-            <View style={{ margin: 6 }}>
-              <BookCard
-                book={item as Book}
-                onPress={() => handleBookPress(item as Book)}
-                onLongPress={() => handleBookLongPress(item as Book)}
-              />
-            </View>
-          )}
-        />
+        <View style={styles.bookGrid}>
+          {books.map((book) => (
+            <BookCard
+              key={book.id}
+              book={book}
+              onPress={() => handleBookPress(book)}
+              onLongPress={() => handleBookLongPress(book)}
+            />
+          ))}
+        </View>
       </View>
     );
   };
@@ -338,40 +340,6 @@ export default function LibraryScreen() {
     </View>
   );
 
-  const renderAllSections = () => {
-    const sections = [
-      {
-        title: "قيد القراءة",
-        books: getBooksByStatus("reading"),
-        emptyMessage: "لا توجد كتب قيد القراءة",
-      },
-      {
-        title: "للقراءة",
-        books: getBooksByStatus("to-read"),
-        emptyMessage: "لا توجد كتب للقراءة",
-      },
-      {
-        title: "مكتمل",
-        books: getBooksByStatus("completed"),
-        emptyMessage: "لا توجد كتب مكتملة",
-      },
-    ];
-
-    // Filter out empty sections
-    const nonEmptySections = sections.filter(
-      (section) => section.books.length > 0
-    );
-
-    return nonEmptySections.map((section, index) => (
-      <View key={section.title}>
-        {renderBookSection(section.title, section.books, section.emptyMessage)}
-        {index < nonEmptySections.length - 1 && (
-          <View style={styles.sectionSeparator} />
-        )}
-      </View>
-    ));
-  };
-
   return (
     <>
       <ScrollView
@@ -384,7 +352,27 @@ export default function LibraryScreen() {
         <View style={styles.header}>
           <Text style={styles.title}>المكتبة</Text>
         </View>
-        {books.length === 0 ? renderEmptyLibrary() : renderAllSections()}
+        {books.length === 0 ? (
+          renderEmptyLibrary()
+        ) : (
+          <>
+            {renderBookSection(
+              "قيد القراءة",
+              getBooksByStatus("reading"),
+              "لا توجد كتب قيد القراءة"
+            )}
+            {renderBookSection(
+              "للقراءة",
+              getBooksByStatus("to-read"),
+              "لا توجد كتب للقراءة"
+            )}
+            {renderBookSection(
+              "مكتملة",
+              getBooksByStatus("completed"),
+              "لا توجد كتب مكتملة"
+            )}
+          </>
+        )}
       </ScrollView>
 
       {/* Progress Update Modal */}
@@ -395,91 +383,75 @@ export default function LibraryScreen() {
         onRequestClose={() => setProgressModalVisible(false)}
         statusBarTranslucent={true}
       >
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={Platform.select({ ios: 80, android: 0 })}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <ScrollView
-                keyboardShouldPersistTaps="handled"
-                keyboardDismissMode="on-drag"
-                overScrollMode="never"
-                contentContainerStyle={{ paddingBottom: 16, flexGrow: 1 }}
-                showsVerticalScrollIndicator={false}
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>تحديث التقدم</Text>
+              <Text style={styles.modalBookTitle}>{selectedBook?.title}</Text>
+            </View>
+
+            <View style={styles.totalPagesInfo}>
+              <Text style={styles.totalPagesText}>
+                عدد الصفحات: {selectedBook?.totalPages}
+              </Text>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <View style={styles.inputWithButtons}>
+                <TouchableOpacity
+                  style={styles.plusButton}
+                  onPress={() => {
+                    const current = parseInt(newPagesRead) || 0;
+                    const max = selectedBook?.totalPages || 0;
+                    const newValue = Math.min(max, current + 1);
+                    setNewPagesRead(newValue.toString());
+                  }}
+                >
+                  <Ionicons name="add" size={24} color="#666666" />
+                </TouchableOpacity>
+
+                <TextInput
+                  style={styles.modalInput}
+                  value={newPagesRead}
+                  onChangeText={setNewPagesRead}
+                  keyboardType="numeric"
+                  placeholder="0"
+                  placeholderTextColor="#999999"
+                  textAlign="center"
+                />
+                <TouchableOpacity
+                  style={styles.minusButton}
+                  onPress={() => {
+                    const current = parseInt(newPagesRead) || 0;
+                    const newValue = Math.max(0, current - 1);
+                    setNewPagesRead(newValue.toString());
+                  }}
+                >
+                  <Ionicons name="remove" size={24} color="#666666" />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.updateButton}
+                onPress={updateBookProgress}
               >
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>تحديث التقدم</Text>
-                  <Text style={styles.modalBookTitle}>
-                    {selectedBook?.title}
-                  </Text>
-                </View>
-
-                <View style={styles.totalPagesInfo}>
-                  <Text style={styles.totalPagesText}>
-                    عدد الصفحات: {selectedBook?.totalPages}
-                  </Text>
-                </View>
-
-                <View style={styles.inputContainer}>
-                  <View style={styles.inputWithButtons}>
-                    <TouchableOpacity
-                      style={styles.plusButton}
-                      onPress={() => {
-                        const current = parseInt(newPagesRead) || 0;
-                        const max = selectedBook?.totalPages || 0;
-                        const newValue = Math.min(max, current + 1);
-                        setNewPagesRead(newValue.toString());
-                      }}
-                    >
-                      <Ionicons name="add" size={24} color="#666666" />
-                    </TouchableOpacity>
-
-                    <TextInput
-                      style={styles.modalInput}
-                      value={newPagesRead}
-                      onChangeText={setNewPagesRead}
-                      keyboardType="numeric"
-                      placeholder="0"
-                      placeholderTextColor="#999999"
-                      textAlign="center"
-                    />
-                    <TouchableOpacity
-                      style={styles.minusButton}
-                      onPress={() => {
-                        const current = parseInt(newPagesRead) || 0;
-                        const newValue = Math.max(0, current - 1);
-                        setNewPagesRead(newValue.toString());
-                      }}
-                    >
-                      <Ionicons name="remove" size={24} color="#666666" />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
-                <View style={styles.modalButtons}>
-                  <TouchableOpacity
-                    style={styles.updateButton}
-                    onPress={updateBookProgress}
-                  >
-                    <Text style={styles.updateButtonText}>تحديث</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.cancelButton}
-                    onPress={() => {
-                      setProgressModalVisible(false);
-                      setSelectedBook(null);
-                      setNewPagesRead("");
-                    }}
-                  >
-                    <Text style={styles.cancelButtonText}>إلغاء</Text>
-                  </TouchableOpacity>
-                </View>
-              </ScrollView>
+                <Text style={styles.updateButtonText}>تحديث</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => {
+                  setProgressModalVisible(false);
+                  setSelectedBook(null);
+                  setNewPagesRead("");
+                }}
+              >
+                <Text style={styles.cancelButtonText}>إلغاء</Text>
+              </TouchableOpacity>
             </View>
           </View>
-        </KeyboardAvoidingView>
+        </View>
       </Modal>
 
       {/* Edit Book Modal */}
@@ -491,101 +463,113 @@ export default function LibraryScreen() {
         statusBarTranslucent={true}
       >
         <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={Platform.select({ ios: 80, android: 0 })}
+          behavior="padding"
+          style={styles.modalOverlay}
+          keyboardVerticalOffset={-100}
         >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              {/* Floating Delete Button */}
+          <View style={styles.modalContent}>
+            {/* Floating Delete Button */}
+            <TouchableOpacity
+              style={styles.floatingDeleteButton}
+              onPress={handleDeleteFromEdit}
+            >
+              <Ionicons name="trash" size={24} color="#F44336" />
+            </TouchableOpacity>
+
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>تعديل الكتاب</Text>
+              <Text style={styles.modalBookTitle}>{bookToEdit?.title}</Text>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>صورة الغلاف:</Text>
               <TouchableOpacity
-                style={styles.floatingDeleteButton}
-                onPress={handleDeleteFromEdit}
+                style={styles.imagePickerButton}
+                onPress={pickEditImage}
               >
-                <Ionicons name="trash" size={24} color="#F44336" />
+                {editForm.cover ? (
+                  <Image
+                    source={{ uri: editForm.cover }}
+                    style={styles.selectedImage}
+                  />
+                ) : (
+                  <View style={styles.imagePlaceholder}>
+                    <Ionicons name="camera" size={32} color="#666666" />
+                    <Text style={styles.imagePlaceholderText}>
+                      اختر صورة الغلاف
+                    </Text>
+                  </View>
+                )}
               </TouchableOpacity>
+            </View>
 
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>تعديل الكتاب</Text>
-                <Text style={styles.modalBookTitle}>{bookToEdit?.title}</Text>
-              </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>عنوان الكتاب:</Text>
+              <TextInput
+                style={styles.modalTextInput}
+                value={editForm.title}
+                onChangeText={(text) =>
+                  setEditForm((prev) => ({ ...prev, title: text }))
+                }
+                placeholder="أدخل عنوان الكتاب"
+                placeholderTextColor="#999999"
+              />
+            </View>
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>صورة الغلاف:</Text>
-                <TouchableOpacity
-                  style={styles.imagePickerButton}
-                  onPress={pickEditImage}
-                >
-                  {editForm.cover ? (
-                    <Image
-                      source={{ uri: editForm.cover }}
-                      style={styles.selectedImage}
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>إجمالي الصفحات:</Text>
+              <TextInput
+                style={styles.modalTextInput}
+                value={editForm.totalPages}
+                onChangeText={(text) =>
+                  setEditForm((prev) => ({ ...prev, totalPages: text }))
+                }
+                keyboardType="numeric"
+                placeholder="أدخل إجمالي الصفحات"
+                placeholderTextColor="#999999"
+              />
+            </View>
+
+            <View style={[styles.inputContainer, styles.inlineLabelRow]}>
+              <Text style={[styles.inputLabel, styles.inlineLabel]}>
+                التقييم:
+              </Text>
+              <View style={styles.ratingRow}>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <TouchableOpacity key={i} onPress={() => setEditRating(i)}>
+                    <Ionicons
+                      name={i <= editRating ? "star" : "star-outline"}
+                      size={20}
+                      color={i <= editRating ? "#F59E0B" : "#C7C7C7"}
                     />
-                  ) : (
-                    <View style={styles.imagePlaceholder}>
-                      <Ionicons name="camera" size={32} color="#666666" />
-                      <Text style={styles.imagePlaceholderText}>
-                        اختر صورة الغلاف
-                      </Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
+                  </TouchableOpacity>
+                ))}
               </View>
+            </View>
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>عنوان الكتاب:</Text>
-                <TextInput
-                  style={styles.modalTextInput}
-                  value={editForm.title}
-                  onChangeText={(text) =>
-                    setEditForm((prev) => ({ ...prev, title: text }))
-                  }
-                  placeholder="أدخل عنوان الكتاب"
-                  placeholderTextColor="#999999"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>إجمالي الصفحات:</Text>
-                <TextInput
-                  style={{
-                    ...styles.modalTextInput,
-                    direction: "ltr",
-                    textAlign: "right",
-                  }}
-                  value={editForm.totalPages}
-                  onChangeText={(text) =>
-                    setEditForm((prev) => ({ ...prev, totalPages: text }))
-                  }
-                  keyboardType="numeric"
-                  placeholder="أدخل إجمالي الصفحات"
-                  placeholderTextColor="#999999"
-                />
-              </View>
-
-              <View style={styles.modalButtons}>
-                <TouchableOpacity
-                  style={styles.updateButton}
-                  onPress={handleEditBook}
-                >
-                  <Text style={styles.updateButtonText}>حفظ</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.cancelButton}
-                  onPress={() => {
-                    setEditModalVisible(false);
-                    setBookToEdit(null);
-                    setEditForm({
-                      title: "",
-                      totalPages: "",
-                      status: "to-read",
-                      cover: "",
-                    });
-                  }}
-                >
-                  <Text style={styles.cancelButtonText}>إلغاء</Text>
-                </TouchableOpacity>
-              </View>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.updateButton}
+                onPress={handleEditBook}
+              >
+                <Text style={styles.updateButtonText}>حفظ</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => {
+                  setEditModalVisible(false);
+                  setBookToEdit(null);
+                  setEditForm({
+                    title: "",
+                    totalPages: "",
+                    status: "to-read",
+                    cover: "",
+                  });
+                  setEditRating(0);
+                }}
+              >
+                <Text style={styles.cancelButtonText}>إلغاء</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </KeyboardAvoidingView>
@@ -634,7 +618,7 @@ export default function LibraryScreen() {
         }}
         title="إعادة تعيين التقدم"
         message={`تحاول تعيين إجمالي الصفحات إلى ${pendingEditData?.totalPages}، لكنك قرأت بالفعل ${bookToEdit?.pagesRead} صفحة. سيؤدي هذا إلى إعادة تعيين تقدم القراءة إلى 0 صفحة.`}
-        confirmText="إعادة تعيين"
+        confirmText="إعادة تعيين التقدم"
         cancelText="إلغاء"
         type="danger"
         icon="warning-outline"
@@ -650,6 +634,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingTop: 60,
+    paddingBottom: 20,
   },
   header: {
     alignItems: "center",
@@ -670,15 +655,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginBottom: 8,
   },
-  masonryContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-  },
-  sectionSeparator: {
-    height: 2,
-    backgroundColor: "#E5E7EB",
-    marginHorizontal: 20,
-    marginBottom: 20,
+  bookGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    paddingHorizontal: 20,
+    justifyContent: "space-between",
+    gap: 12,
   },
   emptyContainer: {
     alignItems: "center",
@@ -729,7 +711,7 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: "#FFFFFF",
     borderRadius: 20,
-    padding: 28,
+    padding: 24,
     margin: 24,
     width: "90%",
     maxWidth: 400,
@@ -741,14 +723,14 @@ const styles = StyleSheet.create({
   },
   modalHeader: {
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 8,
   },
   modalIconContainer: {
     marginBottom: 8,
   },
   modalTitle: {
     fontFamily: "IBMPlexSansArabic-SemiBold",
-    fontSize: 24,
+    fontSize: 22,
     color: "#1A1A1A",
     textAlign: "center",
   },
@@ -763,32 +745,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 8,
   },
-  totalPagesLabel: {
-    fontFamily: "IBMPlexSansArabic-Regular",
-    fontSize: 14,
-    color: "#4A4A4A",
-    marginBottom: 4,
-  },
   totalPagesText: {
     fontFamily: "IBMPlexSansArabic-SemiBold",
     fontSize: 18,
     color: "#1A1A1A",
   },
   inputContainer: {
-    marginBottom: 28,
+    marginBottom: 16,
   },
   inputLabel: {
     fontFamily: "IBMPlexSansArabic-SemiBold",
     fontSize: 18,
     color: "#1A1A1A",
-    marginBottom: 8,
+    marginBottom: 4,
   },
   modalInput: {
     flex: 1,
     padding: 16,
     fontSize: 20,
     color: "#1A1A1A",
-    direction: "ltr",
     textAlign: "center",
     fontFamily: "IBMPlexSansArabic-SemiBold",
   },
@@ -849,6 +824,19 @@ const styles = StyleSheet.create({
     textAlignVertical: "center",
     fontFamily: "IBMPlexSansArabic-SemiBold",
   },
+  ratingRow: {
+    flexDirection: "row",
+    gap: 8,
+    alignItems: "center",
+  },
+  inlineLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  inlineLabel: {
+    marginBottom: 0,
+  },
   deleteButton: {
     flex: 1,
     padding: 16,
@@ -864,7 +852,7 @@ const styles = StyleSheet.create({
   floatingDeleteButton: {
     position: "absolute",
     top: 8,
-    right: 8, // Changed from left to right for RTL
+    right: 8,
     width: 48,
     height: 48,
     justifyContent: "center",

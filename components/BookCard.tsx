@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Book } from "../lib/database";
 // Removed styles import - using fixed values instead
@@ -30,32 +31,46 @@ export default function BookCard({
       onLongPress={onLongPress}
       activeOpacity={0.7}
     >
-      <View style={styles.coverContainer}>
-        <Image
-          source={{ uri: book.cover }}
-          style={styles.cover}
-          resizeMode="cover"
-        />
-      </View>
+      <Image
+        source={{ uri: book.cover }}
+        style={styles.cover}
+        resizeMode="cover"
+      />
 
       <View style={styles.infoContainer}>
-        <Text style={styles.title}>{book.title}</Text>
+        <Text style={styles.title} numberOfLines={3}>
+          {book.title}
+        </Text>
 
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <View
-              style={[
-                styles.progressFill,
-                {
-                  width: `${progressPercentage}%`,
-                  backgroundColor: progressColor,
-                },
-              ]}
-            />
+        <View style={styles.bottomSection}>
+          <View style={styles.ratingRow}>
+            <Text style={styles.ratingText}>التقييم:</Text>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Ionicons
+                key={i}
+                name={i <= (book.rating || 0) ? "star" : "star-outline"}
+                size={18}
+                color={i <= (book.rating || 0) ? "#F59E0B" : "#C7C7C7"}
+              />
+            ))}
           </View>
-          <Text style={styles.percentageText}>
-            {Math.floor(progressPercentage)}%
-          </Text>
+
+          <View style={styles.progressRow}>
+            <View style={styles.progressBar}>
+              <View
+                style={[
+                  styles.progressFill,
+                  {
+                    width: `${progressPercentage}%`,
+                    backgroundColor: progressColor,
+                  },
+                ]}
+              />
+            </View>
+            <Text style={styles.percentageText}>
+              {Math.floor(progressPercentage)}%
+            </Text>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -66,53 +81,65 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
-    padding: 8,
+    padding: 12,
     width: "100%",
     borderWidth: 1,
     borderBottomWidth: 3,
     borderColor: "#E5E7EB",
-  },
-  coverContainer: {
-    position: "relative",
-    marginBottom: 8,
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
   },
   cover: {
-    width: "100%",
-    height: 220,
-    borderRadius: 12,
+    width: 88,
+    height: 130,
+    borderRadius: 8,
   },
   infoContainer: {
     flex: 1,
+    justifyContent: "space-between",
+    height: 132,
   },
   title: {
     fontFamily: "IBMPlexSansArabic-SemiBold",
-    fontSize: 16,
-    textAlign: "center",
+    fontSize: 18,
     color: "#1A1A1A",
-    marginBottom: 8,
-    lineHeight: 22,
+    lineHeight: 24,
   },
-  progressContainer: {
+  bottomSection: {
     marginTop: "auto",
+  },
+  ratingText: {
+    fontFamily: "IBMPlexSansArabic-Regular",
+    fontSize: 16,
+    color: "#1A1A1A",
+    textAlign: "left",
+  },
+  progressRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
   },
+  ratingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    gap: 2,
+  },
   progressBar: {
     flex: 1,
-    height: 12,
+    height: 14,
     backgroundColor: "#F3F4F6",
-    borderRadius: 6,
+    borderRadius: 10,
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
-    borderRadius: 6,
+    borderRadius: 10,
   },
   percentageText: {
     fontFamily: "IBMPlexSansArabic-SemiBold",
     fontSize: 14,
     color: "#4A4A4A",
-    textAlign: "right",
   },
 });

@@ -93,6 +93,7 @@ export default function AddBookScreen() {
         cover: cover.trim(),
         totalPages: Number(totalPages),
         pagesRead: 0,
+        rating: 0,
         status: "to-read",
       });
 
